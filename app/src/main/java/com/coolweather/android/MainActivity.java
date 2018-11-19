@@ -17,7 +17,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         @SuppressLint("WrongConstant")
         SharedPreferences prefs = getSharedPreferences
                 ("weather_info", Context.MODE_PRIVATE);

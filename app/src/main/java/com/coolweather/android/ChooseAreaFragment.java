@@ -5,9 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -66,7 +64,7 @@ public class ChooseAreaFragment extends Fragment {
     private int currentLevel;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_choose_area, container, false);
         titleText = view.findViewById(R.id.title_text);
@@ -191,15 +189,17 @@ public class ChooseAreaFragment extends Fragment {
         showProgressDialog();
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                getActivity().runOnUiThread(() -> {
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
                     closeProgressDialog();
                     Toast.makeText(getContext(), "加载失败", Toast.LENGTH_SHORT).show();
                 });
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(@NonNull Call call, @NonNull Response response)
+                    throws IOException {
+                assert response.body() != null;
                 String responseText = response.body().string();
                 boolean result = false;
 
@@ -211,7 +211,7 @@ public class ChooseAreaFragment extends Fragment {
                     result = Utility.handleCountyResponse(responseText, selectedCity.getId());
                 }
                 if (result) {
-                    getActivity().runOnUiThread(() -> {
+                    Objects.requireNonNull(getActivity()).runOnUiThread(() -> {
                         closeProgressDialog();
                         if ("province".equals(type)) {
                             queryProvinces();
