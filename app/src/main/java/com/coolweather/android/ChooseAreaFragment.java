@@ -1,7 +1,10 @@
 package com.coolweather.android;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -69,7 +72,7 @@ public class ChooseAreaFragment extends Fragment {
         titleText = view.findViewById(R.id.title_text);
         backButton = view.findViewById(R.id.back_button);
         listView = view.findViewById(R.id.list_view);
-        adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, dataList);
+        adapter = new ArrayAdapter<>(Objects.requireNonNull(getContext()), android.R.layout.simple_list_item_1, dataList);
         listView.setAdapter(adapter);
         return view;
     }
@@ -87,10 +90,21 @@ public class ChooseAreaFragment extends Fragment {
                 queryCounties();
             } else if (currentLevel == LEVEL_COUNTY) {
                 String weatherId = countyList.get(position).getWeatherId();
-                Intent intent = new Intent(getActivity(), WeatherActivity.class);
-                intent.putExtra("weather_id", weatherId);
-                startActivity(intent);
-                getActivity().finish();
+                @SuppressLint({"WrongConstant", "CommitPrefEdits"})
+                SharedPreferences.Editor editor =  Objects.requireNonNull(getActivity()).
+                        getSharedPreferences("weather_info", Context.MODE_PRIVATE).edit();
+                editor.putString("weather_id", weatherId);
+                editor.apply();
+                if (getActivity() instanceof MainActivity) {
+                    Intent intent = new Intent(getActivity(), WeatherActivity.class);
+                    startActivity(intent);
+                    getActivity().finish();
+                } else if (getActivity() instanceof WeatherActivity) {
+                    WeatherActivity activity = (WeatherActivity) getActivity();
+                    activity.drawerLayout.closeDrawers();
+                    activity.swipeRefresh.setRefreshing(true);
+                    activity.requestWeather();
+                }
             }
         });
 
